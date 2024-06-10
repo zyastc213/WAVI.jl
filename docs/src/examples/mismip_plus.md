@@ -14,7 +14,7 @@ using Pkg
 Pkg.add(PackageSpec(url="https://github.com/RJArthern/WAVI.jl.git", rev = "main"))
 Pkg.add("Plots")
 Pkg.add("NetCDF")
-using WAVI, Plots
+using WAVI, Plots, NetCDF
 ```
 
 ## Basal Topography
