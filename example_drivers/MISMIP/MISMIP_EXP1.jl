@@ -118,7 +118,7 @@ function plot_evolution()
     Plots.plot!(x, ib_out)
 
     display(plot1)
-    return nothing
 end
 
+println("Displaying a plot for you!")
 plot_evolution()
