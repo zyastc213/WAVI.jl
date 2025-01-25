@@ -40,17 +40,17 @@ dy = 3000.0;
 
 # We need the first three of these before we can build a grid
 h_mask=Array{Float64}(undef,nx,ny);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_h_mask_clip.bin"),h_mask);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_h_mask_clip_BedmachineV3.bin"),h_mask);
 hm = ntoh.(h_mask);
 hm = map.(Bool, round.(Int, hm));
 
 u_iszero=Array{Float64}(undef,nx+1,ny);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_uiszero_clip.bin"),u_iszero);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_uiszero_clip.bin"),u_iszero);
 u_iszero.=ntoh.(u_iszero);
 u_iszero = map.(Bool, round.(Int, u_iszero));
 
 v_iszero=Array{Float64}(undef,nx,ny+1);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_viszero_clip.bin"),v_iszero);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_viszero_clip.bin"),v_iszero);
 v_iszero.=ntoh.(v_iszero);
 v_iszero = map.(Bool, round.(Int, v_iszero));
 
@@ -62,7 +62,7 @@ grid = Grid(nx = nx, ny = ny, nσ = nσ, x0 = x0, y0 = y0, dx = dx, dy = dy, h_m
 
 # Next up: the bed, which will be passed to a model via the `bed_elevation` keyword article, as usual.
 bed=Array{Float64}(undef,nx,ny);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_bed_clip_noNan.bin"),bed);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_bed_clip_noNan.bin"),bed);
 bed.=ntoh.(bed)
 
 # Let's take a look at the bed
@@ -76,19 +76,19 @@ plt = Plots.heatmap(grid.xxh[:,1]/1e3, grid.yyh[1,:]/1e3, bed',
 
 # Temperature, damage, viscosity, and thickness will be passed to a model via initial conditions (these quantities are time dependent)
 temp=Array{Float64}(undef,nx,ny,nσ);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_3Dtemp_clip_noNan.bin"),temp);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_3Dtemp_clip_noNan.bin"),temp);
 temp.=ntoh.(temp)
 
 damage=Array{Float64}(undef,nx,ny,nσ);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_damage3D_clip_noNan.bin"),damage);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_damage3D_clip_noNan.bin"),damage);
 damage.=ntoh.(damage)
 
 h=Array{Float64}(undef,nx,ny);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_thickness_clip_noNan.bin"),h);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_thickness_clip_noNan.bin"),h);
 h.=ntoh.(h)
 
 viscosity=Array{Float64}(undef,nx,ny,nσ);
-read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/main/WAIS/Inverse_3km_viscosity3D_clip_noNan.bin"),viscosity);
+read!(Downloads.download("https://github.com/alextbradley/WAVI_example_data/raw/refs/heads/main/WAIS/Inverse_5km_viscosity3D_clip_noNan.bin"),viscosity);
 viscosity.=ntoh.(viscosity);
 
 solver_params=SolverParams(maxiter_picard=20)
