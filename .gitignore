@@ -13,6 +13,7 @@ Manifest.toml
 *.DS_Store
 
 #useful things to ignore when testing driver scripts
+/drivers/
 driver_updated.jl
 *.box
 *.data
