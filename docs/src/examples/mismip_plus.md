@@ -116,15 +116,11 @@ timestepping_params = TimesteppingParams(dt = 0.5,
 ```
 Note that as in other example, we have to specify the end time as `10000.` (a float number) rather than `10000` (an integer) because WAVI.jl expects the same numeric type for the timestep `dt` and the end time `end_time`.
 
-We'll output the solution along the way, and use this to convince ourselves later than we are in steady state. First let's make a directory to store the output
-```julia
-folder = joinpath(@__DIR__, "mismip");
-isdir(folder) && rm(folder, force = true, recursive = true);
-mkdir(folder) ;
-```
+We'll output the solution along the way, and use this to convince ourselves later than we are in steady state. 
 
-Then we define our output parameters. We'll output the thickness and grounded fraction every 200 years, and set the zip_format keyword argument to zip the output files to an nc format when the simulation is finished.
+First we define our output parameters. We'll output the thickness and grounded fraction every 200 years, and set the zip_format keyword argument to zip the output files to an nc format when the simulation is finished.
 ```julia
+folder = "mismip_1_output"
 output_params = OutputParams(outputs = (h = model.fields.gh.h,grfrac = model.fields.gh.grounded_fraction),
                             output_freq = 200.,
                             output_path = folder,
@@ -175,13 +171,13 @@ Finally, let's check that it's in steady state, by looking at the evolution of t
 filename = joinpath(folder, "outfile.nc");
 h = ncread(filename, "h");
 grfrac = ncread(filename, "grfrac");
-time = ncread(filename, "TIME");
+tm = ncread(filename, "TIME");
 #compute the volume above floatation
-vaf = zeros(1,length(time))
-for i = 1:length(time)
+vaf = zeros(1,length(tm))
+for i = 1:length(tm)
     vaf[i] = volume_above_floatation(h[:,:,i], simulation.model.fields.gh.b, Ref(simulation.model.params), simulation.model.grid )
 end
-Plots.plot(time, vaf[:]/1e9,
+Plots.plot(tm, vaf[:]/1e9,
              marker = true, 
              label = :none,
              xlabel = "time (years)",
