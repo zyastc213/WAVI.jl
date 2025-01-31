@@ -11,6 +11,7 @@ Manifest.toml
 *.bin
 #*.png
 *.DS_Store
+/docs/build
 
 #useful things to ignore when testing driver scripts
 /drivers/
