@@ -139,7 +139,7 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
                 #add this to dictionary
                 output_dict[key] = var_out
             else
-                @warn string("found an output variable (", key, ") who's spatial dimensions do not match the co-ordinates. Skipping this variable from the nc output...")
+                @warn string("found an output variable (", key, ") who's spatial dimensions (", sz, ") do not match the co-ordinates. Skipping this variable from the nc output...")
             end
         end
     end
