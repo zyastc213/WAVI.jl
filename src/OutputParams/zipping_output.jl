@@ -133,6 +133,8 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
                 for i = 1:length(filenames)
                     var_nc[:,:,i] = get_output_as_dict(filenames[i], format)[key]
                 end
+            else
+                @warn string("found an output variable (", key, ") who's spatial dimensions do not match the co-ordinates. Skipping this variable from the nc output...")
             end
         end
     end
