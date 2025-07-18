@@ -13,8 +13,8 @@ First let's make sure we have all required packages installed.
 using Pkg
 Pkg.add(PackageSpec(url="https://github.com/RJArthern/WAVI.jl.git", rev = "main"))
 Pkg.add("Plots")
-Pkg.add("NetCDF")
-using WAVI, Plots, NetCDF
+Pkg.add("NCDatasets")
+using WAVI, Plots, NCDatasets
 ```
 
 ## Basal Topography
@@ -173,9 +173,13 @@ You can see, by comparing with the plot of the bed earlier, that the grounding l
 Finally, let's check that it's in steady state, by looking at the evolution of the volume above floatation:
 ```julia
 filename = joinpath(folder, "outfile.nc");
-h = ncread(filename, "h");
 grfrac = ncread(filename, "grfrac");
 time = ncread(filename, "TIME");
+ds = NCDataset(filename)
+h = ds["h"][:,:,:]
+grfrac = ds["grfrac"][:,:,:]
+time = ds["TIME"][:]
+close(ds)
 #compute the volume above floatation
 vaf = zeros(1,length(time))
 for i = 1:length(time)

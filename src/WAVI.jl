@@ -3,7 +3,7 @@ module WAVI
 #Useful packages
 using LinearAlgebra, SparseArrays, LinearMaps, Parameters,
       IterativeSolvers, Interpolations, BenchmarkTools, Reexport,
-      NetCDF, JLD2, Setfield, MAT, ImageFiltering, InplaceOps,
+      NCDatasets, JLD2, Setfield, MAT, ImageFiltering, InplaceOps,
       NonlinearSolve,SciMLNLSolve
 
 #Import functions so they can be modified in this module.

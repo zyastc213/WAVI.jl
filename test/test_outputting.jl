@@ -1,4 +1,4 @@
-using Test, WAVI, MAT, JLD2, NetCDF, Dates
+using Test, WAVI, MAT, JLD2, NCDatasets, Dates
 
 function output_test(; dt  = 0.5, 
                     end_time = 100., 
@@ -161,17 +161,23 @@ test_output_errors = true
                     @test isfile(fname) #check the zipped file exists
 
                     #test variables read from nc file
-                    x = ncread(fname, "x")
-                    y = ncread(fname, "y")
-                    h = ncread(fname, "h")
-                    u = ncread(fname, "u")
-                    v = ncread(fname, "v")
-                    b = ncread(fname, "b")
-                    t = ncread(fname, "TIME")
+                    ds = NCDataset(fname)
+                    x = ds["x"][:]
+                    y = ds["y"][:]
+                    h = ds["h"][:,:,:]
+                    u = ds["u"][:,:,:]
+                    v = ds["v"][:,:,:]
+                    b = ds["b"][:,:,:]
+                    t = ds["TIME"][:]
+                    close(ds)
                     if output_start
-                        @test ncread(fname, "TIME") == 0.:5.:100.
+                        ds = NCDataset(fname)
+                        @test ds["TIME"][:] == 0.:5.:100.
+                        close(ds)
                     else
-                        @test ncread(fname, "TIME") == 5.:5.:100.
+                        ds = NCDataset(fname)
+                        @test ds["TIME"][:] == 5.:5.:100.
+                        close(ds)
                     end
                         
                     @test size(x) == (80,)
@@ -231,14 +237,18 @@ test_output_errors = true
                 #test variables read from nc file
                 fname = string(folder, sim.output_params.prefix, ".nc")
                 println(fname)
-                x = ncread(fname, "x")
-                y = ncread(fname, "y")
-                h = ncread(fname, "h")
-                u = ncread(fname, "u")
-                v = ncread(fname, "v")
-                b = ncread(fname, "b")
-                t = ncread(fname, "TIME")
-                @test ncread(fname, "TIME") == 0.5:0.5:20.
+                ds = NCDataset(fname)
+                x = ds["x"][:]
+                y = ds["y"][:]
+                h = ds["h"][:,:,:]
+                u = ds["u"][:,:,:]
+                v = ds["v"][:,:,:]
+                b = ds["b"][:,:,:]
+                t = ds["TIME"][:]
+                close(ds)
+                ds = NCDataset(fname)
+                @test ds["TIME"][:] == 0.5:0.5:20.
+                close(ds)
                 @test size(x) == (80,)
                 @test size(y) == (10,)
                 @test size(b) == (length(x),length(y),length(t))
@@ -267,14 +277,18 @@ test_output_errors = true
                 #test variables read from nc file
                 fname = string(folder, sim.output_params.prefix, ".nc")
                 println(fname)
-                x = ncread(fname, "x")
-                y = ncread(fname, "y")
-                h = ncread(fname, "h")
-                u = ncread(fname, "u")
-                v = ncread(fname, "v")
-                b = ncread(fname, "b")
-                t = ncread(fname, "TIME")
-                @test ncread(fname, "TIME") == 0.5:0.5:20.5
+                ds = NCDataset(fname)
+                x = ds["x"][:]
+                y = ds["y"][:]
+                h = ds["h"][:,:,:]
+                u = ds["u"][:,:,:]
+                v = ds["v"][:,:,:]
+                b = ds["b"][:,:,:]
+                t = ds["TIME"][:]
+                close(ds)
+                ds = NCDataset(fname)
+                @test ds["TIME"][:] == 0.5:0.5:20.5
+                close(ds)
                 @test size(x) == (80,)
                 @test size(y) == (10,)
                 @test size(b) == (length(x),length(y),length(t))

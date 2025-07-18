@@ -1,3 +1,5 @@
+using NCDatasets
+
 """
     get_format_filenames(format, folder)
 
@@ -104,9 +106,9 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
     x_atts, y_atts, time_atts = get_spatiotemporal_var_atts()
 
     #setup Dimensions
-    t_ncdim = NcDim("TIME", t, atts = time_atts)
-    x_ncdim = NcDim("x", x, atts = x_atts)
-    y_ncdim = NcDim("y", y, atts = y_atts)
+    # Store dimension names and values for later use
+    dim_names = ("x", "y", "TIME")
+    dim_vals = (x, y, t)
 
     #create the nc file variables
     output_dict = Dict() #dictionary for the output values
@@ -127,11 +129,7 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
             #check the size of this variable in the first file
             sz = size(get_output_as_dict(filenames[1],format)[key])
             if sz == (length(x), length(y))
-                #if the size is OK, create a variable and add to the array
-                ncvar_key = NcVar(key, Array([x_ncdim, y_ncdim, t_ncdim]))
-                output_vars[key] = ncvar_key
-                
-                #get the data in an array
+                # get the data in an array
                 for i = 1:length(filenames)
                     var_out[:,:,i] = get_output_as_dict(filenames[i],format)[key]
                 end
@@ -144,14 +142,43 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
         end
     end
 
-    #make the nc file
+    # Write NetCDF file using NCDatasets
     isfile(nc_name_full) && rm(nc_name_full)
-    NetCDF.create(nc_name_full, [val for val in values(output_vars)]) do nc
-        # Writing data to the file is done using putvar
-        for key in keys(output_dict) #for every variable of the correct size
-            NetCDF.putvar(nc,key,output_dict[key])
-        end
+    ds = NCDataset(nc_name_full, "c")
+    
+    # Create dimensions
+    ds.dim["x"] = length(x)
+    ds.dim["y"] = length(y)
+    ds.dim["TIME"] = length(t)
+
+    # Define coordinate variables first
+    # This creates the variable object in the dataset
+    x_var = defVar(ds, "x", Float64, ("x",))
+    y_var = defVar(ds, "y", Float64, ("y",))
+    t_var = defVar(ds, "TIME", Float64, ("TIME",))
+    
+    # Now assign the data to the defined variables
+    x_var[:] = x
+    y_var[:] = y
+    t_var[:] = t
+    
+    # Add attributes
+    x_var.attrib["longname"] = x_atts["longname"]
+    x_var.attrib["units"] = x_atts["units"]
+    y_var.attrib["longname"] = y_atts["longname"]
+    y_var.attrib["units"] = y_atts["units"]
+    t_var.attrib["longname"] = time_atts["longname"]
+    t_var.attrib["units"] = time_atts["units"]
+    
+    # Write data variables
+    for key in keys(output_dict)
+        # Define the data variable with its appropriate dimensions
+        # Assuming all output_dict[key] are 3D (x, y, TIME)
+        data_var = defVar(ds, key, eltype(output_dict[key]), ("x", "y", "TIME"))
+        # Now assign the data
+        data_var[:] = output_dict[key]
     end
+    close(ds)
     return nothing
 end
 
