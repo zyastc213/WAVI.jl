@@ -22,11 +22,14 @@ jobs:
 
       - name: Install libnetcdf via Conda and set environment
         run: |
-          julia --project=docs/ -e '
-            using Conda;
-            Conda.add("libnetcdf");
-            println("CONDA_LIB_PATH=", Conda.LIBDIR);
+          julia -e '
+              import Pkg;
+              Pkg.add("Conda");
+              using Conda;
+              Conda.add("libnetcdf");
+              println("CONDA_LIB_PATH=", Conda.LIBDIR);
           ' >> $GITHUB_ENV
+
 
       - name: Instantiate after library is installed
         env:
