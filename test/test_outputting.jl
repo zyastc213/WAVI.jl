@@ -161,31 +161,29 @@ test_output_errors = true
                     @test isfile(fname) #check the zipped file exists
 
                     #test variables read from nc file
-                    ds = NCDataset(fname)
-                    x = ds["x"][:]
-                    y = ds["y"][:]
-                    h = ds["h"][:,:,:]
-                    u = ds["u"][:,:,:]
-                    v = ds["v"][:,:,:]
-                    b = ds["b"][:,:,:]
-                    t = ds["TIME"][:]
-                    close(ds)
-                    if output_start
-                        ds = NCDataset(fname)
-                        @test ds["TIME"][:] == 0.:5.:100.
-                        close(ds)
-                    else
-                        ds = NCDataset(fname)
-                        @test ds["TIME"][:] == 5.:5.:100.
-                        close(ds)
+                    NCDataset(fname, "r") do ds
+                    # Read all necessary variables from the open dataset
+                        x = ds["x"][:]
+                        y = ds["y"][:]
+                        h = ds["h"][:,:,:]
+                        u = ds["u"][:,:,:]
+                        v = ds["v"][:,:,:]
+                        b = ds["b"][:,:,:]
+                        t = ds["TIME"][:]
+
+                        if output_start
+                            @test t == 0.:5.:100.
+                        else
+                            @test t == 5.:5.:100.
+                        end
+                            
+                        @test size(x) == (80,)
+                        @test size(y) == (10,)
+                        @test size(b) == (length(x), length(y), length(t))
+                        @test size(u) == (length(x), length(y), length(t))
+                        @test size(v) == (length(x), length(y), length(t))
+                        @test size(h) == (length(x), length(y), length(t))
                     end
-                        
-                    @test size(x) == (80,)
-                    @test size(y) == (10,)
-                    @test size(b) == (length(x),length(y),length(t))
-                    @test size(u) == (length(x),length(y),length(t))
-                    @test size(v) == (length(x),length(y),length(t))
-                    @test size(h) == (length(x),length(y),length(t))
             
                     #delete the folder
                     rm(folder, force = true, recursive = true)
@@ -237,24 +235,23 @@ test_output_errors = true
                 #test variables read from nc file
                 fname = string(folder, sim.output_params.prefix, ".nc")
                 println(fname)
-                ds = NCDataset(fname)
-                x = ds["x"][:]
-                y = ds["y"][:]
-                h = ds["h"][:,:,:]
-                u = ds["u"][:,:,:]
-                v = ds["v"][:,:,:]
-                b = ds["b"][:,:,:]
-                t = ds["TIME"][:]
-                close(ds)
-                ds = NCDataset(fname)
-                @test ds["TIME"][:] == 0.5:0.5:20.
-                close(ds)
-                @test size(x) == (80,)
-                @test size(y) == (10,)
-                @test size(b) == (length(x),length(y),length(t))
-                @test size(u) == (length(x),length(y),length(t))
-                @test size(v) == (length(x),length(y),length(t))
-                @test size(h) == (length(x),length(y),length(t))
+                NCDataset(fname, "r") do ds
+                    x = ds["x"][:]
+                    y = ds["y"][:]
+                    h = ds["h"][:,:,:]
+                    u = ds["u"][:,:,:]
+                    v = ds["v"][:,:,:]
+                    b = ds["b"][:,:,:]
+                    t = ds["TIME"][:]
+
+                    @test ds["TIME"][:] == 0.5:0.5:20.
+                    @test size(x) == (80,)
+                    @test size(y) == (10,)
+                    @test size(b) == (length(x), length(y), length(t))
+                    @test size(u) == (length(x), length(y), length(t))
+                    @test size(v) == (length(x), length(y), length(t))
+                    @test size(h) == (length(x), length(y), length(t))
+                end
 
                 #check we have the right number of output files 
                 foldersim = sim.output_params.output_path 
@@ -277,24 +274,24 @@ test_output_errors = true
                 #test variables read from nc file
                 fname = string(folder, sim.output_params.prefix, ".nc")
                 println(fname)
-                ds = NCDataset(fname)
-                x = ds["x"][:]
-                y = ds["y"][:]
-                h = ds["h"][:,:,:]
-                u = ds["u"][:,:,:]
-                v = ds["v"][:,:,:]
-                b = ds["b"][:,:,:]
-                t = ds["TIME"][:]
-                close(ds)
-                ds = NCDataset(fname)
-                @test ds["TIME"][:] == 0.5:0.5:20.5
-                close(ds)
-                @test size(x) == (80,)
-                @test size(y) == (10,)
-                @test size(b) == (length(x),length(y),length(t))
-                @test size(u) == (length(x),length(y),length(t))
-                @test size(v) == (length(x),length(y),length(t))
-                @test size(h) == (length(x),length(y),length(t))
+
+                NCDataset(fname, "r") do ds
+                    x = ds["x"][:]
+                    y = ds["y"][:]
+                    h = ds["h"][:,:,:]
+                    u = ds["u"][:,:,:]
+                    v = ds["v"][:,:,:]
+                    b = ds["b"][:,:,:]
+                    t = ds["TIME"][:]
+
+                    @test ds["TIME"][:] == 0.5:0.5:20.5
+                    @test size(x) == (80,)
+                    @test size(y) == (10,)
+                    @test size(b) == (length(x), length(y), length(t))
+                    @test size(u) == (length(x), length(y), length(t))
+                    @test size(v) == (length(x), length(y), length(t))
+                    @test size(h) == (length(x), length(y), length(t))
+                end
 
                 #check we have the right number of files
                 foldersim = sim.output_params.output_path 

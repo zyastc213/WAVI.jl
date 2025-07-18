@@ -1,5 +1,3 @@
-using NCDatasets
-
 """
     get_format_filenames(format, folder)
 
@@ -105,80 +103,39 @@ function make_ncfile_from_filenames(filenames, format, nc_name_full)
     #setup attributes for spatiotemporal variables 
     x_atts, y_atts, time_atts = get_spatiotemporal_var_atts()
 
-    #setup Dimensions
-    # Store dimension names and values for later use
-    dim_names = ("x", "y", "TIME")
-    dim_vals = (x, y, t)
+    # Get the keys of variables to be written (excluding spatial and time dimensions)
+    filekeys = collect(keys(get_output_as_dict(filenames[1], format)))
+    data_keys = filter(k -> !(k in ["x", "y", "t"]), filekeys)
 
-    #create the nc file variables
-    output_dict = Dict() #dictionary for the output values
-    output_vars = Dict() #dictionary for the output variables
+    # Remove existing file if it exists
+    isfile(nc_name_full) && rm(nc_name_full)
     
-    #get the keys
-    if format == "mat"
-        filekeys = keys(matread(filenames[1]))
-    elseif format == "jld2"
-        filekeys = keys(load(filenames[1]))
-        #println(typeof(filekeys))
-    end
+    NCDataset(nc_name_full, "c") do ds
+        defDim(ds, "x", length(x))
+        defDim(ds, "y", length(y))
+        defDim(ds,"TIME", length(t))
 
-    for key in filekeys
-        if ~(key in ["x", "y", "t"]) #if this isn't a spatial dimensions
-            var_out = zeros(length(x), length(y), length(t))
-    
-            #check the size of this variable in the first file
-            sz = size(get_output_as_dict(filenames[1],format)[key])
+        # Define and write coordinate variables
+        defVar(ds, "x", x, ("x",), attrib = x_atts)
+        defVar(ds, "y", y, ("y",), attrib = y_atts)
+        defVar(ds, "TIME", t, ("TIME",), attrib = time_atts)
+
+        for key in data_keys
+            # Get the data from the first file to determine its type and size
+            first_file_data = get_output_as_dict(filenames[1], format)[key]
+            sz = size(first_file_data)
+
             if sz == (length(x), length(y))
-                # get the data in an array
-                for i = 1:length(filenames)
-                    var_out[:,:,i] = get_output_as_dict(filenames[i],format)[key]
-                end
+                # Define the variable in the NetCDF file
+                var_nc = defVar(ds, key, eltype(first_file_data), ("x", "y", "TIME"))
 
-                #add this to dictionary
-                output_dict[key] = var_out
-            else
-                @warn string("found an output variable (", key, ") who's spatial dimensions do not match the co-ordinates. Skipping this variable from the nc output...")
+                # Populate the variable by iterating through filenames
+                for i = 1:length(filenames)
+                    var_nc[:,:,i] = get_output_as_dict(filenames[i], format)[key]
+                end
             end
         end
     end
-
-    # Write NetCDF file using NCDatasets
-    isfile(nc_name_full) && rm(nc_name_full)
-    ds = NCDataset(nc_name_full, "c")
-    
-    # Create dimensions
-    ds.dim["x"] = length(x)
-    ds.dim["y"] = length(y)
-    ds.dim["TIME"] = length(t)
-
-    # Define coordinate variables first
-    # This creates the variable object in the dataset
-    x_var = defVar(ds, "x", Float64, ("x",))
-    y_var = defVar(ds, "y", Float64, ("y",))
-    t_var = defVar(ds, "TIME", Float64, ("TIME",))
-    
-    # Now assign the data to the defined variables
-    x_var[:] = x
-    y_var[:] = y
-    t_var[:] = t
-    
-    # Add attributes
-    x_var.attrib["longname"] = x_atts["longname"]
-    x_var.attrib["units"] = x_atts["units"]
-    y_var.attrib["longname"] = y_atts["longname"]
-    y_var.attrib["units"] = y_atts["units"]
-    t_var.attrib["longname"] = time_atts["longname"]
-    t_var.attrib["units"] = time_atts["units"]
-    
-    # Write data variables
-    for key in keys(output_dict)
-        # Define the data variable with its appropriate dimensions
-        # Assuming all output_dict[key] are 3D (x, y, TIME)
-        data_var = defVar(ds, key, eltype(output_dict[key]), ("x", "y", "TIME"))
-        # Now assign the data
-        data_var[:] = output_dict[key]
-    end
-    close(ds)
     return nothing
 end
 
