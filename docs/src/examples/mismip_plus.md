@@ -173,18 +173,27 @@ You can see, by comparing with the plot of the bed earlier, that the grounding l
 Finally, let's check that it's in steady state, by looking at the evolution of the volume above floatation:
 ```julia
 filename = joinpath(folder, "outfile.nc");
-grfrac = ncread(filename, "grfrac");
-time = ncread(filename, "TIME");
-ds = NCDataset(filename)
-h = ds["h"][:,:,:]
-grfrac = ds["grfrac"][:,:,:]
-time = ds["TIME"][:]
-close(ds)
-#compute the volume above floatation
-vaf = zeros(1,length(time))
-for i = 1:length(time)
-    vaf[i] = volume_above_floatation(h[:,:,i], simulation.model.fields.gh.b, Ref(simulation.model.params), simulation.model.grid )
+
+ds = NCDataset(filename, "r") do ds
+    h_data = ds["h"][:, :, :]
+    grfrac_data = ds["grfrac"][:, :, :]
+    time_data = ds["TIME"][:]
+
+    #compute the volume above floatation
+    vaf = zeros(length(time_data)) 
+
+    for i = 1:length(time_data)
+        vaf[i] = volume_above_floatation(h_data[:, :, i], 
+                                         simulation.model.fields.gh.b, 
+                                         Ref(simulation.model.params), 
+                                         simulation.model.grid)
+    end
+
+    return time_data, vaf
 end
+
+time, vaf = ds
+
 Plots.plot(time, vaf[:]/1e9,
              marker = true, 
              label = :none,
