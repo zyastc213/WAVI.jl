@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - docs-reconcile
-      - main # update to match your development branch (master, main, dev, trunk, ...)
+      - main
     tags: '*'
   pull_request:
 
@@ -15,35 +15,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: julia-actions/setup-julia@v1
         with:
           version: '1.6'
 
-      - name: Install Conda libnetcdf and set library path
+      - name: Install libnetcdf via Conda and set environment
         run: |
           julia --project=docs/ -e '
-            using Pkg;
-            Pkg.develop(PackageSpec(path=pwd()));
-            Pkg.instantiate();
             using Conda;
             Conda.add("libnetcdf");
             println("CONDA_LIB_PATH=", Conda.LIBDIR);
           ' >> $GITHUB_ENV
 
-      - name: Set LD_LIBRARY_PATH and build NCDatasets
+      - name: Instantiate after library is installed
+        env:
+          LD_LIBRARY_PATH: ${{ env.CONDA_LIB_PATH }}:$LD_LIBRARY_PATH
         run: |
           export LD_LIBRARY_PATH=${{ env.CONDA_LIB_PATH }}:$LD_LIBRARY_PATH
           julia --project=docs/ -e '
             using Pkg;
-            Pkg.build("NCDatasets");
+            Pkg.develop(PackageSpec(path=pwd()));
+            Pkg.instantiate();
           '
-
-      - name: Debug libnetcdf
-        run: |
-          find ~/.julia/conda -name "libnetcdf*"
-          echo $LD_LIBRARY_PATH
 
       - name: Build and deploy
         env:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
+          LD_LIBRARY_PATH: ${{ env.CONDA_LIB_PATH }}:$LD_LIBRARY_PATH
         run: julia --project=docs/ docs/make.jl
