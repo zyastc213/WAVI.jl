@@ -31,12 +31,8 @@ jobs:
         uses: julia-actions/cache@v1
 
       - name: Instantiate and precompile base env
-        run: julia --project=. -e '
-          using Pkg
-          Pkg.develop(PackageSpec(path=pwd()))
-          Pkg.instantiate()
-          Pkg.precompile()
-        '
+        run: julia --project=test/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+
 
       - name: Run tests
         run: julia --project=test/ test/runtests_structure.jl
