@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - docs-reconcile
+    tags: '*'
+  pull_request:
+
+jobs:
+  test-and-docs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        julia-version: ['1.6', '1.10', '1.11']
+
+    name: Julia ${{ matrix.julia-version }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Cache Julia environment
+        uses: julia-actions/cache@v1
+
+      - name: Instantiate and precompile base env
+        run: julia --project=. -e '
+          using Pkg
+          Pkg.develop(PackageSpec(path=pwd()))
+          Pkg.instantiate()
+          Pkg.precompile()
+        '
+
+      - name: Run tests
+        run: julia --project=test/ test/runtests_structure.jl
+
+      - name: Build and deploy docs (only on 1.6)
+        if: matrix.julia-version == '1.6' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs-reconcile' || startsWith(github.ref, 'refs/tags/'))
+        env:
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+        run: julia --project=docs/ docs/make.jl
