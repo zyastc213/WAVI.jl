@@ -35,14 +35,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docs-artifacts-
 
-      - name: Install documentation dependencies
-        run: julia --project=docs/ -e '
-          using Pkg;
-          Pkg.develop(path=".");
-          Pkg.add("Documenter");
-          Pkg.instantiate();'
-
-      - name: Build and deploy docs
+      - name: Install dependencies and build docs
         env:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-        run: julia --project=docs/ docs/make.jl
+        run: |
+          julia --project=docs/ -e '
+            using Pkg
+            Pkg.develop(path=".")
+            if !("Documenter" in keys(Pkg.project().dependencies))
+                Pkg.add("Documenter")
+            end
+            Pkg.instantiate()'
+          julia --project=docs/ docs/make.jl
+
