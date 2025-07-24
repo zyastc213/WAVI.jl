@@ -1,4 +1,4 @@
-name: Docs
+name: Documentation
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Julia
         uses: julia-actions/setup-julia@v1
         with:
-          version: '1.10'
+          version: '1.11'
 
       - name: Cache Julia packages
         uses: actions/cache@v3
@@ -35,11 +35,10 @@ jobs:
             ${{ runner.os }}-docs-artifacts-
 
       - name: Install documentation dependencies
-        run: julia --project=docs -e 'using Pkg; Pkg.instantiate()'
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
 
       - name: Install main project dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
+        run: julia --project=. -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()''
 
       - name: Build and deploy docs
         env:
