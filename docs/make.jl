@@ -105,7 +105,6 @@ format = Documenter.HTML(
 
 
 makedocs(
-    bib,
     sitename = "WAVI.jl",
     format = format,
     pages = pages,
@@ -113,7 +112,8 @@ makedocs(
     doctest = false,
     strict = false,
     clean = false,
-    checkdocs = :none
+    checkdocs = :none,
+    plugins = [bib]
 )
 
 
