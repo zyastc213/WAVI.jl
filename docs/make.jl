@@ -1,5 +1,6 @@
 import Pkg; 
 Pkg.activate(joinpath(@__DIR__, ".."))
+Pkg.add("Documenter")
 Pkg.instantiate()
 
 using Documenter

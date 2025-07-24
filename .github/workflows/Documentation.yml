@@ -42,9 +42,6 @@ jobs:
           julia --project=docs/ -e '
             using Pkg
             Pkg.develop(path=".")
-            if !("Documenter" in keys(Pkg.project().dependencies))
-                Pkg.add("Documenter")
-            end
             Pkg.instantiate()'
           julia --project=docs/ docs/make.jl
 
