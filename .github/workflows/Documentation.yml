@@ -34,12 +34,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-docs-artifacts-
 
+      - name: Install documentation dependencies
+        run: julia --project=docs -e 'using Pkg; Pkg.instantiate()'
+
       - name: Install main project dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Install documentation dependencies
-        run: julia --project=docs -e 'using Pkg; Pkg.instantiate()'
-        
+
       - name: Build and deploy docs
         env:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

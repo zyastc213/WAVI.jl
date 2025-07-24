@@ -2,7 +2,6 @@
 name = "WAVI-docs"
 
 [deps]
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
@@ -14,4 +13,3 @@ Documenter = "1.14.1"
 DocumenterCitations = "1.4.0"
 Literate = "2.20.1"
 Plots = "1.40.17"
-Dates = "1.11.0"
