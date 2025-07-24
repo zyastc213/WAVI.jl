@@ -1,7 +1,5 @@
-push!(LOAD_PATH,"../src/")
 import Pkg; 
 Pkg.activate(joinpath(@__DIR__, ".."))
-Pkg.add(name="Documenter")
 Pkg.instantiate()
 
 using Documenter

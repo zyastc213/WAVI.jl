@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,10 +36,11 @@ jobs:
             ${{ runner.os }}-docs-artifacts-
 
       - name: Install documentation dependencies
-        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
-
-      - name: Install main project dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()''
+        run: julia --project=docs/ -e '
+          using Pkg;
+          Pkg.develop(path=".");
+          Pkg.add("Documenter");
+          Pkg.instantiate();'
 
       - name: Build and deploy docs
         env:
