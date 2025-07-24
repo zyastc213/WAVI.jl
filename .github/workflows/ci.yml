@@ -38,7 +38,7 @@ jobs:
         run: julia --project=test/ test/runtests_structure.jl
 
       - name: Build and deploy docs (only on 1.6)
-        if: matrix.julia-version == '1.6' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs-reconcile' || startsWith(github.ref, 'refs/tags/'))
+        if: matrix.julia-version == '1.6'
         env:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
         run: julia --project=docs/ docs/make.jl
