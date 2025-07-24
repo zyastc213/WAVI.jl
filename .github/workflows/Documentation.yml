@@ -7,6 +7,10 @@ on:
       - docs-reconcile
     tags: '*'
   pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+      - '**/*.jl'
 
 jobs:
   docs:
@@ -15,14 +19,27 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
         with:
-          version: '1.11'
-      - name: Cache Julia environment
-        uses: julia-actions/cache@v1
-      - name: Instantiate and precompile docs env
-        run: julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+          version: '1.10'
+
+      - name: Cache Julia packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.julia/artifacts
+          key: ${{ runner.os }}-docs-artifacts-${{ hashFiles('**/Project.toml', '**/Manifest.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-artifacts-
+
+      - name: Install main project dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Install documentation dependencies
+        run: julia --project=docs -e 'using Pkg; Pkg.instantiate()'
+        
       - name: Build and deploy docs
         env:
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

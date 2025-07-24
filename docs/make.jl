@@ -1,7 +1,6 @@
 push!(LOAD_PATH,"../src/")
 import Pkg; 
 Pkg.activate(joinpath(@__DIR__, ".."))
-Pkg.add(name="Documenter", version="0.27.25")
 Pkg.instantiate()
 
 using Documenter
@@ -110,7 +109,8 @@ format = Documenter.HTML(
 )
 
 
-makedocs(bib,
+makedocs(
+    bib,
     sitename = "WAVI.jl",
     format = format,
     pages = pages,
@@ -118,7 +118,9 @@ makedocs(bib,
     doctest = false,
     strict = false,
     clean = false,
-    checkdocs = :none)
+    checkdocs = :none
+)
+
 
 deploydocs(
     repo="github.com/RJArthern/WAVI.jl",
