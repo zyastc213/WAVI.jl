@@ -1,0 +1,29 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - main
+      - docs-reconcile
+    tags: '*'
+  pull_request:
+
+jobs:
+  docs:
+    name: Docs (Julia 1.11)
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.11'
+      - name: Cache Julia environment
+        uses: julia-actions/cache@v1
+      - name: Instantiate and precompile docs env
+        run: julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+      - name: Build and deploy docs
+        env:
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+        run: julia --project=docs/ docs/make.jl
