@@ -98,9 +98,9 @@ pages = [
 
 format = Documenter.HTML(
     collapselevel = 1,
-       prettyurls = get(ENV, "CI", nothing) == "true",
-        #canonical = "website_url_here",
-       mathengine = MathJax3()
+    prettyurls = get(ENV, "CI", nothing) == "true",
+    #canonical = "website_url_here",
+    mathengine = MathJax3()
 )
 
 
@@ -109,10 +109,10 @@ makedocs(
     format = format,
     pages = pages,
     modules = [WAVI],
-    doctest = false,
-    strict = false,
-    clean = false,
+    doctest = ("doctest" in ARGS),
+    linkcheck = ("linkcheck" in ARGS),
     checkdocs = :none,
+    clean = false,
     plugins = [bib]
 )
 
