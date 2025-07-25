@@ -7,7 +7,7 @@ WAVI.jl solves the [governing equations](../physics/governing_equations.md) on a
 <figcaption>Figure 1: Locations within grid cells that ice thickness $h$, velocity components $u$ and $v$, and shear strain rates $c = (\partial u /\partial y + \partial v / \partial x)/2$ are stored. </figcaption></center>
 ```
 
-The set of all such points at which the ice thickness is stored defines the $h$-grid. The $u$-grid, $v$-grid, and $c$-grid are defined analagously. Various different quantities are also stored on each of these grids, and used as part of the solution (see [Fields](../data_structure/fields.md) for more information).
+The set of all such points at which the ice thickness is stored defines the $h$-grid. The $u$-grid, $v$-grid, and $c$-grid are defined analagously. Various different quantities are also stored on each of these grids, and used as part of the solution (see [Fields](../API/fields.md) for more information).
 
 Three dimensional fields used in the governing equations (e.g. viscosity) are stored $h$-grid points, extrapolated into the $z$ direction. This grid is referred to as the $\sigma$-grid.
 
