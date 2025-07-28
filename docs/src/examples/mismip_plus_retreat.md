@@ -70,9 +70,7 @@ timestepping_params = TimesteppingParams(dt = 0.5,
                                         end_time = 100.,)
             
 #make a folder for outputs
-folder = joinpath(@__DIR__, "mismip");
-isdir(folder) && rm(folder, force = true, recursive = true);
-mkdir(folder) ;
+folder = "mismip_2_output"
 
 #specify output parameters
 output_params = OutputParams(outputs = (h = model.fields.gh.h,grfrac = model.fields.gh.grounded_fraction), #output the thickness and grounded fraction, so we can compute the volume about floatation
@@ -137,9 +135,7 @@ model_advance = Model(grid = grid,
 We can use the same timestepping parameters. We'll make a new output parameters object so we can output in a different place
 ```julia
 #make a folder for outputs
-folder_advance = joinpath(@__DIR__, "mismip_advance");
-isdir(folder_advance) && rm(folder_advance, force = true, recursive = true);
-mkdir(folder_advance) ;
+folder_advance = "mismip_advance";
 
 #specify output parameters
 output_params_advance = OutputParams(outputs = (h = model_advance.fields.gh.h,grfrac = model_advance.fields.gh.grounded_fraction), #output the thickness and grounded fraction, so we can compute the volume about floatation

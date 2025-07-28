@@ -12,7 +12,7 @@ The set of all such points at which the ice thickness is stored defines the $h$-
 Three dimensional fields used in the governing equations (e.g. viscosity) are stored $h$-grid points, extrapolated into the $z$ direction. This grid is referred to as the $\sigma$-grid.
 
 ## Problem Reduction
-This section contains brief details of the procedure by which the momentum balance equations [governing equations](../physics/governing_equations.md)(2)--(4) are reduced to a non-linear equation for the depth average velocity $\bar{\mathbf{u}}$. For full details, refer to [Arthern2015](@cite).
+This section contains brief details of the procedure by which the momentum balance equations [governing equations](../physics/governing_equations.md) (2)--(4) are reduced to a non-linear equation for the depth average velocity $\bar{\mathbf{u}}$. For full details, refer to [Arthern2015](@cite).
 
 To make progress in solving the [governing equations](../physics/governing_equations.md), horizontal gradients in vertical velocity are neglected and vertical shear stresses are assumed to vary linearly with depth. Then, if the ice thickness $h$, surface elevation $h$, ice stiffness, basal stresses and horizontal stress components are known, the depth integrated viscosity 
 ```math
@@ -20,7 +20,7 @@ To make progress in solving the [governing equations](../physics/governing_equat
     \bar{\eta} = \frac{1}{h}\int_{s - h}^{h} \eta~\mathrm{d}z
 \end{equation}
 ```
-can be computed numerically. Here $\eta$ is the ice viscosity (equation (4) in the[governing equations](../physics/governing_equations.md)).
+can be computed numerically. Here $\eta$ is the ice viscosity (equation (4) in the [governing equations](../physics/governing_equations.md)).
 
 After depth integrating the approximation to the horizonal stress components, and using the Robin boundary condition (equation (7)), the basal velocity components -- and thus basal stress terms -- can be expressed in terms of the depth averaged velocity components. The basal stress components can then be eliminated from  [governing equations](../physics/governing_equations.md)(2)--(3), which can therefore be expressed as a non-linear problem for $\bar{\mathbf{u}}$, the depth averaged velocity:
 ```math
