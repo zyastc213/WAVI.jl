@@ -17,7 +17,7 @@ using Pkg
 Pkg.add("https://github.com/RJArthern/WAVI.jl"), Pkg.add(Plots)
 
 ````@example overdeepened_bed
-using WAVI, Plots, NetCDF
+using WAVI, Plots, NCDatasets
 ````
 
 ## Basal Topography
@@ -211,10 +211,17 @@ Finally, let's check that it's in steady state, by looking at the evolution of t
 
 ````@example overdeepened_bed
 filename = joinpath(@__DIR__, "overdeepened_bed", "outfile.nc");
-h = ncread(filename, "h");
-grfrac = ncread(filename, "grfrac");
-time = ncread(filename, "TIME");
-vaf = sum(sum(h .* grfrac .* dx .*dy,dims = 1),dims = 2); #volume of ice above floatation
+
+time, h, grfrac = NCDataset(filename, "r") do ds
+    # Read variables directly from the NCDataset object
+    h_data = ds["h"][:,:,:]
+    grfrac_data = ds["grfrac"][:,:,:]
+    time_data = ds["TIME"][:]
+    return time_data, h_data, grfrac_data
+end
+
+vaf = sum(h .* grfrac .* dx .* dy, dims=(1, 2)); #volume of ice above floatation
+
 Plots.plot(time, vaf[1,1,:]/1e9,
              marker = true,
              label = :none,

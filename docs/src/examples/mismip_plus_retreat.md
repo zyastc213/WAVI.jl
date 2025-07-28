@@ -11,7 +11,7 @@ First let's make sure we have all required packages installed. As well as WAVI a
 using Pkg
 Pkg.add(PackageSpec(url="https://github.com/RJArthern/WAVI.jl.git", rev = "main"))
 Pkg.add("Plots"), Pkg.add("Downloads")
-using WAVI, Plots, Downloads
+using WAVI, Plots, Downloads, NCDatasets
 ```
 
 ## Setting up the model
@@ -90,20 +90,32 @@ run_simulation!(simulation)
 Let's plot the volume above floatation through time (volume above floatation is the volume of ice above the thickness set the Archimedean floatation condition). 
 ```julia
 filename = joinpath(folder, "outfile.nc");
-h = ncread(filename, "h");
-grfrac = ncread(filename, "grfrac");
-time = ncread(filename, "TIME");
-#compute the volume above floatation
-vaf = zeros(1,length(time))
-for i = 1:length(time)
-    vaf[i] = volume_above_floatation(h[:,:,i], simulation.model.fields.gh.b, Ref(simulation.model.params), simulation.model.grid )
-end
-Plots.plot(time, vaf[:]/1e9,
+
+# Declare variables so they can be used globally
+local h, grfrac, time_array, vaf
+
+# Open the NetCDF file
+Dataset(filename, "r") do ds
+    # Read variables
+    h = ds["h"][:, :, :]
+    grfrac = ds["grfrac"][:]
+    time_array = ds["TIME"][:]
+
+    # Initialize vaf array
+    vaf = zeros(length(time_array))
+
+    # Compute the volume above floatation
+    for i = 1:length(time_array)
+        vaf[i] = volume_above_floatation(h[:, :, i], simulation.model.fields.gh.b, Ref(simulation.model.params), simulation.model.grid)
+    end
+
+    Plots.plot(time_array, vaf[:]/1e9,
              marker = true, 
              label = :none,
              xlabel = "time (years)",
              ylabel = "volume above floatation (km^3)",
              framestyle = :box)
+end
 ```
 
 ```@raw html
@@ -145,17 +157,24 @@ run_simulation!(simulation_advance)
 Let's work out the volume above floatation evolution for this phase and add it to the earlier plot.
 ```julia
 filename = joinpath(folder_advance, "outfile.nc");
-h_adv = ncread(filename, "h");
-grfrac_adv = ncread(filename, "grfrac");
-time_adv = ncread(filename, "TIME");
-time_adv = time_adv .+ time[end] #shift the time by the final entry of the retreat phase
 
-#compute the volume above floatation
-vaf_adv = zeros(1,length(time_adv))
-for i = 1:length(time_adv)
-    vaf_adv[i] = volume_above_floatation(h_adv[:,:,i], simulation_advance.model.fields.gh.b, Ref(simulation_advance.model.params), simulation_advance.model.grid )
+local time_adv, vaf_adv
+Dataset(filename, "r") do ds_advance
+    h_adv = ds_advance["h"][:, :, :]
+    grfrac_adv = ds_advance["grfrac"][:]
+    time_adv = ds_advance["TIME"][:]
+
+    time_adv = time_adv .+ time_array[end] #shift the time by the final entry of the retreat phase
+
+    #compute the volume above floatation
+    vaf_adv = zeros(length(time_adv))
+
+    for i = 1:length(time_adv)
+        vaf_adv[i] = volume_above_floatation(h_adv[:,:,i], simulation_advance.model.fields.gh.b, Ref(simulation_advance.model.params), simulation_advance.model.grid )
+    end
 end
-Plots.plot(time, vaf[:]/1e9,
+
+Plots.plot(time_array, vaf[:]/1e9,
              marker = true, 
              label = "advance",
              xlabel = "time (years)",
