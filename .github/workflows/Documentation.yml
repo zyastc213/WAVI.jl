@@ -11,12 +11,18 @@ on:
       - 'docs/**'
       - '.github/workflows/docs.yml'
       - '**/*.jl'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 
 jobs:
   docs:
     name: Docs (Julia 1.11)
     permissions:
       contents: write
+    if: '! github.event.pull_request.draft'
     runs-on: ubuntu-latest
 
     steps:
