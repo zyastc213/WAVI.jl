@@ -24,7 +24,7 @@ We first build a WAVI `model`, by passing it a grid containing information about
 Below, we build a grid with 300 grid points in the `x` direction. We use 2 grid points in the `y` direction which is equivalent to being one-dimensional. This grid has a resolution of 12km.
 
 ```julia
-grid = Grid(nx = 300, ny = 2, dx = 12000.0, dy = 12000.0)
+grid = Grid(nx = 300, ny = 2, dx = 12000.0, dy = 12000.0);
 ```
 
 Next, we write a function which defines the bed (note that WAVI.jl accepts both functions and arrays of the same size as the grid as bed inputs, but here we'll use a function for simplicity). You can read more about functions in julia [here](https://docs.julialang.org/en/v1/manual/functions/)
@@ -32,7 +32,7 @@ Next, we write a function which defines the bed (note that WAVI.jl accepts both 
 ```julia
 function bed_elevation(x,y)  
     B = 720 - 778.5 * x ./ (750e3)
-return B
+    return B
 end
 ```
 This bed drops a height of 778.5m in every 750km, where the latter is a typical length scale for the Antarctic ice sheet.
@@ -51,7 +51,7 @@ initial_conditions = InitialConditions(initial_thickness = 300. .* ones(grid.nx,
 
 Now we are ready to build a `Model` by assembling these pieces:
 ```julia
-model = Model(grid = grid, bed_elevation = bed_elevation, params = params,initial_conditions=initial_conditions);
+model = Model(grid = grid, bed_elevation = bed_elevation, params = params, initial_conditions = initial_conditions);
 ```
 ## Updating the model state
 Having built the model, we can solve for the ice velocities associated with the geometry we set via the initial conditions. To do so, we use the `update_state!` function, which takes a model and updates the velocities to be in line with the geometry.
@@ -135,11 +135,10 @@ run_simulation!(simulation);
 Our simulation ran! The object `simulation` holds all the information about the state at time 10 years. Note that the current model state can be accessed via `simulation.model`, so we could use the above plotting commands to look at the geometry and velocity, if we wanted. 
 
 ## Outputting the solution
-#Our simulation ran successfully, but we don't have any information about what happened. We get around this by outputting the solution regularly. To do so, we first make a clean folder where solution files will go:
+Our simulation ran successfully, but we don't have any information about what happened. We get around this by outputting the solution regularly. To do so, we first make a clean folder where solution files will go:
 
 ```julia
-folder = joinpath(@__DIR__, "planar_one_dimensional_flow"); #specify the location of the directory, @__DIR__ is the directory holding this script
-isdir(folder) && rm(folder, force = true, recursive = true); #delete this folder (probably not good practice)
+folder = "planar_one_dimensional_flow" # the name of the directory
 mkdir(folder) #make the folder
 ```
 
