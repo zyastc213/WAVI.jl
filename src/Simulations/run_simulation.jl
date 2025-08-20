@@ -6,7 +6,7 @@ Perform one timestep of the simulation
 function timestep!(simulation)
     @unpack model,timestepping_params, output_params, clock = simulation
     update_state!(model, clock)
-    #write solution if at the first timestep (hack for https://github.com/RJArthern/WAVI.jl/issues/46 until synchronicity is fixed)
+    #write solution if at the first timestep (hack for https://github.com/WAVI-ice-sheet-model/WAVI.jl/issues/46 until synchronicity is fixed)
     if (output_params.output_start) && (simulation.clock.n_iter == 0)
         write_output(simulation)
     end

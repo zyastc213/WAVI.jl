@@ -212,7 +212,7 @@ test_output_errors = true
                             dump_vel = true, 
                             pchkpt_freq = 1.)
 
-                #get the time that the first file was outputted (test for https://github.com/RJArthern/WAVI.jl/issues/35)
+                #get the time that the first file was outputted (test for https://github.com/WAVI-ice-sheet-model/WAVI.jl/issues/35)
                 first_file_name = joinpath("outputs",string("outfile0000000001.", output_format));
                 @test isfile(first_file_name) #check the first output point exists
                 dt1 = Dates.unix2datetime(mtime(first_file_name)) #time of last modification
