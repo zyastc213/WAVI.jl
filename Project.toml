@@ -1,7 +1,7 @@
 name = "WAVI"
 uuid = "881191c6-26ca-4787-919d-8f98f1c41532"
 authors = ["rart "]
-version = "0.1.0"
+version = "0.0.3"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
