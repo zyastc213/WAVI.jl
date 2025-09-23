@@ -11,10 +11,12 @@ Manifest.toml
 *.bin
 #*.png
 *.DS_Store
+/docs/build
 
 #useful things to ignore when testing driver scripts
+/drivers/
 driver_updated.jl
 *.box
 *.data
 **/Attribution_driver
-
+/melt_rate_parametrizations/
