@@ -17,6 +17,9 @@ function update_state!(model, clock)
     update_velocities_on_h_grid!(model)
     update_dhdt!(model)
     update_model_wavelets!(model)
+    update_erosion_rate!(model)
+    update_bed_erosion!(model)
+    update_bed_elevation!(model)
     return nothing
 end
 
@@ -38,6 +41,9 @@ function update_state!(model)
     update_velocities_on_h_grid!(model)
     update_dhdt!(model)
     update_model_wavelets!(model)
+    update_erosion_rate!(model)
+    update_bed_erosion!(model)
+    update_bed_elevation!(model)
     return nothing
 end
 
@@ -196,4 +202,31 @@ Wrapper function for that which updates the model wavelets
 function update_model_wavelets!(model::AbstractModel)
     update_wavelets!(model)
     return model
+end
+
+"""
+    updata_erosion_rate!(model::AbstractModel)
+"""
+
+function update_erosion_rate!(model::AbstractModel)
+    @unpack gh=model.fields
+    @unpack params=model
+    gh.erosion_rate .=  params.erosion_K_g * gh.bed_speed .^ params.erosion_l
+end
+
+"""
+    update_bed_erosion!(model::AbstractModel)
+"""
+function update_bed_erosion!(model::AbstractModel)
+    @unpack gh=model.fields
+    @assert size(gh.bed_erosion) == size(gh.erosion_rate)
+    gh.bed_erosion .+= gh.erosion_rate
+end
+
+"""
+    update_bed_elevation!(model::AbstractModel)
+"""
+function update_bed_elevation!(model::AbstractModel)
+    @unpack gh=model.fields
+    gh.b .-= gh.bed_erosion
 end
