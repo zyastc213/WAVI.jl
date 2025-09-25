@@ -228,5 +228,5 @@ end
 """
 function update_bed_elevation!(model::AbstractModel)
     @unpack gh=model.fields
-    gh.b .-= gh.bed_erosion
+    gh.b .-= gh.erosion_rate
 end
