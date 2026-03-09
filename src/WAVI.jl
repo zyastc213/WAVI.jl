@@ -14,6 +14,7 @@ import Setfield: @set
 #Abstract types
 abstract type AbstractGrid{T <: Real, N <: Integer} end
 abstract type AbstractMeltRate end
+abstract type AbstractSurfaceProcess end
 abstract type AbstractParallelSpec end
 abstract type AbstractModel{T <: Real, N <: Integer, M <: AbstractMeltRate, PS <: AbstractParallelSpec} end
 abstract type AbstractPreconditioner{T <: Real, N <: Integer} end
@@ -63,6 +64,7 @@ include("Wavelets/Wavelets.jl")
 include("Fields/Fields.jl")
 include("Models/Model.jl")
 include("SharedMemorySpec.jl")
+include("Surface/Surface.jl")
 include("MeltRate/MeltRate.jl")
 include("Simulations/Simulation.jl")
 include("utilities.jl")

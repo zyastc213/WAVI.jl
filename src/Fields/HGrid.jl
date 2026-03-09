@@ -28,6 +28,8 @@ struct HGrid{T <: Real, N  <: Integer}
          erosion_rate :: Array{T,2}                            # erosion rate
           bed_erosion :: Array{T,2}                            # bed erosion
             bed_speed :: Array{T,2}                            # Ice speed at the bed
+             air_temp :: Array{T,3}                            # air temperature (x, y, month)
+               precip :: Array{T,3}                            # precipitation (x, y, month)
            weertman_c :: Array{T,2}                            # Weertman drag coefficients 
                     β :: Array{T,2}                            # Raw β value (eqn 8 in Arthern 2015 JGeophysRes)
                  βeff :: Array{T,2}                            # Effective β value (eqn 12 in Arthern 2015 JGeophysRes)
@@ -75,6 +77,8 @@ function HGrid(;
                 mask = trues(nxh,nyh),
                 h_isfixed = falses(nxh,nxy),
                 b,
+                air_temp,
+                precip,
                 h = zeros(nxh,nyh),
                 ηav = zeros(nxh,nyh),
                 grounded_fraction = ones(nxh,nyh))
@@ -126,6 +130,8 @@ function HGrid(;
     @assert spread == sparse(samp')
     @assert size(cent_xy) == ((nxh-1)*(nyh-1),nxh*nyh)
     @assert size(b)==(nxh,nyh)
+    @assert size(air_temp)==(nxh,nyh,12)
+    @assert size(precip)==(nxh,nyh,12)
     @assert size(h)==(nxh,nyh)
     @assert size(s)==(nxh,nyh)
     @assert size(dhdt)==(nxh,nyh)
@@ -169,6 +175,8 @@ return HGrid(
             spread,
             cent_xy,
             b,
+            air_temp,
+            precip,
             h,
             s,
             dhdt,
