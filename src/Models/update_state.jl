@@ -1,3 +1,4 @@
+# include("../Surface/PDD.jl")
 
 """
 update_state!(model::AbstractModel, clock)
@@ -17,16 +18,14 @@ function update_state!(model, clock)
     update_velocities_on_h_grid!(model)
     update_dhdt!(model)
     update_model_wavelets!(model)
-    update_erosion_rate!(model)
-    update_bed_erosion!(model)
-    update_bed_elevation!(model)
+    update_BedErosion!(model)
     return nothing
 end
 
 """
 update_state!(model::AbstractModel)
 
-Update the model to the current time-indepdent situation
+Update the model to the current time-independent situation
 """
 function update_state!(model)
     update_surface_elevation!(model)
@@ -41,9 +40,7 @@ function update_state!(model)
     update_velocities_on_h_grid!(model)
     update_dhdt!(model)
     update_model_wavelets!(model)
-    update_erosion_rate!(model)
-    update_bed_erosion!(model)
-    update_bed_elevation!(model)
+    update_BedErosion!(model)
     return nothing
 end
 
@@ -110,9 +107,8 @@ end
 Update the accumulation rate.
 """
 function update_accumulation_rate!(model::AbstractModel)
-    @unpack params = model
-    @unpack gh=model.fields
-    gh.accumulation .= params.accumulation_rate
+    update_surface_melt!(model.surface_melt, model.clim, model.params, model.fields)
+    println("check 1")
     return model
 end
 
@@ -191,6 +187,7 @@ function update_dhdt!(model::AbstractModel)
     @unpack gh,gu,gv=model.fields
     gh.dhdt[gh.mask].=gh.samp*(gh.accumulation[:] .- gh.basal_melt[:] .-
              (  (gu.∂x*(gu.crop*(gu.h[:].*gu.u[:]))) .+ (gv.∂y*(gv.crop*(gv.h[:].*gv.v[:]))) ) )
+    println("check 3")
     return model
 end
 
@@ -204,29 +201,14 @@ function update_model_wavelets!(model::AbstractModel)
     return model
 end
 
-"""
-    updata_erosion_rate!(model::AbstractModel)
-"""
-
-function update_erosion_rate!(model::AbstractModel)
-    @unpack gh=model.fields
-    @unpack params=model
-    gh.erosion_rate .=  params.erosion_K_g * gh.bed_speed .^ params.erosion_l
-end
-
-"""
-    update_bed_erosion!(model::AbstractModel)
-"""
-function update_bed_erosion!(model::AbstractModel)
-    @unpack gh=model.fields
-    @assert size(gh.bed_erosion) == size(gh.erosion_rate)
-    gh.bed_erosion .+= gh.erosion_rate
-end
-
-"""
-    update_bed_elevation!(model::AbstractModel)
-"""
-function update_bed_elevation!(model::AbstractModel)
-    @unpack gh=model.fields
-    gh.b .-= gh.erosion_rate
+function update_BedErosion!(model::AbstractModel)
+    @unpack fields = model
+    @unpack bed_erosion = model
+    update_BedErosion_obj!(bed_erosion, fields)
+    if bed_erosion.change_bedrock
+        update_bed_elevation!(bed_erosion, fields)
+        println("bedrock is changed")
+    else
+        println("bedrock is fixed")
+    end
 end

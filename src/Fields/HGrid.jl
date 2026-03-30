@@ -25,11 +25,7 @@ struct HGrid{T <: Real, N  <: Integer}
                    vs :: Array{T,2}                            # y-velocity at the surface 
                    ub :: Array{T,2}                            # x-velocity at the bed 
                    vb :: Array{T,2}                            # y-velocity at the bed
-         erosion_rate :: Array{T,2}                            # erosion rate
-          bed_erosion :: Array{T,2}                            # bed erosion
             bed_speed :: Array{T,2}                            # Ice speed at the bed
-             air_temp :: Array{T,3}                            # air temperature (x, y, month)
-               precip :: Array{T,3}                            # precipitation (x, y, month)
            weertman_c :: Array{T,2}                            # Weertman drag coefficients 
                     β :: Array{T,2}                            # Raw β value (eqn 8 in Arthern 2015 JGeophysRes)
                  βeff :: Array{T,2}                            # Effective β value (eqn 12 in Arthern 2015 JGeophysRes)
@@ -75,10 +71,8 @@ function HGrid(;
                 nxh, 
                 nyh,
                 mask = trues(nxh,nyh),
-                h_isfixed = falses(nxh,nxy),
+                h_isfixed = falses(nxh,nyh),
                 b,
-                air_temp,
-                precip,
                 h = zeros(nxh,nyh),
                 ηav = zeros(nxh,nyh),
                 grounded_fraction = ones(nxh,nyh))
@@ -110,8 +104,6 @@ function HGrid(;
     vs = zeros(nxh,nyh)
     ub = zeros(nxh,nyh) 
     vb = zeros(nxh,nyh)
-    erosion_rate = zeros(nxh,nyh)
-    bed_erosion = zeros(nxh,nyh)
     bed_speed = zeros(nxh,nyh)
     weertman_c = zeros(nxh,nyh)
     β = zeros(nxh,nyh)
@@ -130,8 +122,6 @@ function HGrid(;
     @assert spread == sparse(samp')
     @assert size(cent_xy) == ((nxh-1)*(nyh-1),nxh*nyh)
     @assert size(b)==(nxh,nyh)
-    @assert size(air_temp)==(nxh,nyh,12)
-    @assert size(precip)==(nxh,nyh,12)
     @assert size(h)==(nxh,nyh)
     @assert size(s)==(nxh,nyh)
     @assert size(dhdt)==(nxh,nyh)
@@ -146,8 +136,6 @@ function HGrid(;
     @assert size(av_speed)==(nxh,nyh) 
     @assert size(ub)==(nxh,nyh)
     @assert size(vb)==(nxh,nyh)
-    @assert size(erosion_rate)==(nxh,nyh)
-    @assert size(bed_erosion)==(nxh,nyh)
     @assert size(us)==(nxh,nyh)
     @assert size(vs)==(nxh,nyh)
     @assert size(bed_speed)==(nxh,nyh)
@@ -175,8 +163,6 @@ return HGrid(
             spread,
             cent_xy,
             b,
-            air_temp,
-            precip,
             h,
             s,
             dhdt,
@@ -193,8 +179,6 @@ return HGrid(
             vs,
             ub,
             vb,
-            erosion_rate,
-            bed_erosion,
             bed_speed,
             weertman_c,
             β,

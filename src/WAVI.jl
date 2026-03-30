@@ -15,8 +15,9 @@ import Setfield: @set
 abstract type AbstractGrid{T <: Real, N <: Integer} end
 abstract type AbstractMeltRate end
 abstract type AbstractSurfaceProcess end
+abstract type AbstractBedErosion end
 abstract type AbstractParallelSpec end
-abstract type AbstractModel{T <: Real, N <: Integer, M <: AbstractMeltRate, PS <: AbstractParallelSpec} end
+abstract type AbstractModel{T <: Real, N <: Integer, M <: AbstractMeltRate, S <: AbstractSurfaceProcess, B <: AbstractBedErosion, PS <: AbstractParallelSpec} end
 abstract type AbstractPreconditioner{T <: Real, N <: Integer} end
 #abstract type AbstractSimulation{T,N,R,A,W} end
 
@@ -36,7 +37,10 @@ export
     volume_above_floatation, height_above_floatation,
 
     #Abstract types
-    AbstractGrid, AbstractMeltRate, AbstractParallelSpec, AbstractModel, AbstractPreconditioner
+    AbstractGrid, AbstractMeltRate, AbstractParallelSpec, AbstractModel, AbstractPreconditioner, AbstractSurfaceProcess, AbstractBedErosion,
+    
+    # surface melt
+    PDD_obj,Clim_obj,BedErosion_obj
 
 #Reexport Modules useful for users of the WAVI module
 @reexport using JLD2
@@ -62,9 +66,10 @@ include("InitialConditions.jl")
 include("KroneckerProduct.jl")
 include("Wavelets/Wavelets.jl")
 include("Fields/Fields.jl")
+include("Surface/SurfaceMelt.jl")
+include("BedErosion/BedErosion.jl")
 include("Models/Model.jl")
 include("SharedMemorySpec.jl")
-include("Surface/Surface.jl")
 include("MeltRate/MeltRate.jl")
 include("Simulations/Simulation.jl")
 include("utilities.jl")

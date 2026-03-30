@@ -22,8 +22,6 @@ glen_a_activation_energy :: T
        minimum_thickness :: T 
            evolveShelves :: Bool
                 smallHAF :: T
-             erosion_K_g :: T
-               erosion_l :: T
 end
 
 
@@ -80,8 +78,7 @@ function Params(; g = 9.81,
                   minimum_thickness = 50.0,
                   evolveShelves = true,
                   smallHAF = 1.0,
-                  erosion_K_g = 5e-5,
-                  erosion_l = 1.0)
+                  )
                       
   #defualt the timestep to 1.0 (will be updated when the model is embedded in a simulation)
   dt = 1.0
@@ -109,8 +106,6 @@ function Params(; g = 9.81,
                   sea_level_wrt_geoid,
                   minimum_thickness,
                   evolveShelves,
-                  smallHAF,
-                  erosion_K_g,
-                  erosion_l
+                  smallHAF
                   )
 end

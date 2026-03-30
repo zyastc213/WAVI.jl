@@ -1,10 +1,13 @@
-struct Model{T <: Real, N <: Integer,A,W, G, M <:AbstractMeltRate, PS <: AbstractParallelSpec} <: AbstractModel{T,N,M,PS}
+struct Model{T <: Real, N <: Integer,A,W, G, M <:AbstractMeltRate, S <:AbstractSurfaceProcess, B <: AbstractBedErosion, PS <: AbstractParallelSpec} <: AbstractModel{T,N,M,S,B,PS}
     grid::Grid{T,N}
     params::Params{T,A,W,G}
     solver_params::SolverParams{T,N}
     initial_conditions::InitialConditions{T}
     fields::Fields{T,N}
     melt_rate::M
+    surface_melt::S
+    clim::Clim_obj{T}
+    bed_erosion::B
     parallel_spec::PS
 end
 
@@ -29,6 +32,7 @@ Keyword arguments
 - `initial_conditions`: an `InitialConditions` object that (optionally) defines the initial ice thickness, temperature, viscosity, and damage
 - `melt_rate`: a melt rate model, responsible for controlling/setting the basal melt rate
 - `parallel_spec`: specification of parallel computation method.
+- 'surface_melt': about surface melt process, like PDD.
 
 """
 function Model(;
@@ -38,6 +42,9 @@ function Model(;
     solver_params = SolverParams(),
     initial_conditions = InitialConditions(),
     melt_rate = UniformMeltRate(),
+    surface_melt = PDD_obj(),
+    clim = Clim_obj(),
+    bed_erosion = BedErosion_obj(),
     parallel_spec = BasicParallelSpec())
 
     #check that a grid and bed has been inputted
@@ -85,9 +92,9 @@ function Model(;
 
     #Setup the fields 
     fields = setup_fields(grid, initial_conditions, solver_params, params, bed_array)
-
+    println("check zya")
     #Use type constructor to build initial state with no extra physics
-    model=Model(grid,params,solver_params,initial_conditions,fields,melt_rate,parallel_spec)
+    model=Model(grid,params,solver_params,initial_conditions,fields,melt_rate, surface_melt, clim, bed_erosion, parallel_spec)
 
     return model
 end

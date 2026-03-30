@@ -47,7 +47,7 @@ function setup_fields(grid, initial_conditions, solver_params, params, bed_array
         b = bed_array,
         h = h,
         ηav = ηav,
-        grounded_fraction = grounded_fraction
+        grounded_fraction = grounded_fraction,
     )
 
     #u-grid
