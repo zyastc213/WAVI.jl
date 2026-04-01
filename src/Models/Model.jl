@@ -87,8 +87,10 @@ function Model(;
     #check size compatibility of resulting glen a ref
     (size(params.glen_a_ref)==(grid.nx,grid.ny)) || throw(DimensionMismatch("Size of input glen_a_ref must match grid size (i.e. $(grid.nx) x $(grid.ny))"))
 
-
-
+    if isa(surface_melt.σ_T, Number) 
+        surface_melt = @set surface_melt.σ_T = surface_melt.σ_T*ones(grid.nx,grid.ny,12)
+    end
+    (size(surface_melt.σ_T)==(grid.nx,grid.ny,12)) || throw(DimensionMismatch("Size of input σ_T must match grid size (i.e. $(grid.nx) x $(grid.ny) x 12)"))
 
     #Setup the fields 
     fields = setup_fields(grid, initial_conditions, solver_params, params, bed_array)

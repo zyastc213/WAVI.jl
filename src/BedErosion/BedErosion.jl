@@ -11,7 +11,7 @@ function BedErosion_obj(;
                         l = 1.0,
                         erosion_rate = nothing,
                         erosion_accumulation = nothing,
-                        change_bedrock = true
+                        change_bedrock = false
                         )
     ~(erosion_rate === nothing) || throw(ArgumentError("You must input a initial erosion_rate such as zeros(nx,ny)"))
     ~(erosion_accumulation === nothing) || throw(ArgumentError("You must input a initial erosion_accumulation such as zeros(nx,ny)"))

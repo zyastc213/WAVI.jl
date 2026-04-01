@@ -1,15 +1,16 @@
 using SpecialFunctions
 # Distributions
 
-struct PDD_obj{T <: Real} <: AbstractSurfaceProcess
+struct PDD_obj{T <: Real, X} <: AbstractSurfaceProcess
     T_min :: T                    # air temperature all precipitation as snowfall
     T_max :: T                    # air temperature all precipitation as rainfall
-    σ_T :: T                      # standard deviation of daily temperature variation
+    σ_T :: X                      # standard deviation of daily temperature variation
     σ_lapse_lat_base :: T         # the latitude where = σ_T 
     σ_lapse_lat_rate :: T         # the lapse rate of σ_T
     θr :: T                       # refreeze fraction
     Fi :: T                       # factor ice 
     Fs :: T                       # factor snow
+    SMB_max :: T
     PDD_scheme :: Bool            # choose if you want to use PDD scheme
     SMB :: Array{T,2}             # surface mass balance
 end 
@@ -23,17 +24,18 @@ function PDD_obj(;
             θr=0.6,
             Fi=0.00879120879120879,
             Fs=0.0032967032967033,
+            SMB_max=3.0,
             PDD_scheme = true,
             SMB = nothing
             )
  
     @assert T_max > T_min
-    @assert σ_T > 0
+    @assert any(σ_T .> 0)
     @assert 0 <= θr <= 1 
     @assert Fi > 0 && Fs >0
     ~(SMB === nothing) || throw(ArgumentError("You must input a initial SMB such as zeros(nx,ny)"))
 
-    return PDD_obj(T_min, T_max, σ_T, σ_lapse_lat_base, σ_lapse_lat_rate, θr, Fi, Fs, PDD_scheme, SMB)
+    return PDD_obj(T_min, T_max, σ_T, σ_lapse_lat_base, σ_lapse_lat_rate, θr, Fi, Fs, SMB_max, PDD_scheme, SMB)
 end
 
 # calculate the number of PDDs (in:T out:PDD) 
@@ -42,8 +44,8 @@ function compute_PDD_CalovGreve05(σ_T,
     N = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     PDD = zeros(size(T[:,:,1]))
     for i=1:12
-        Z = T[:,:,i] ./ (sqrt(2) * σ_T)
-        PDD .+= (σ_T / sqrt(2*π) .* exp.(-Z.^2) + T[:,:,i] ./ 2 .* erfc.(-Z)) .* N[i]
+        Z = T[:,:,i] ./ (sqrt(2) .* σ_T[:,:,i])
+        PDD .+= (σ_T[:,:,i] ./ sqrt(2*π) .* exp.(-Z.^2) + T[:,:,i] ./ 2 .* erfc.(-Z)) .* N[i]
     end
     println("PDD_max: $(maximum(PDD))")
     return PDD
@@ -89,22 +91,23 @@ function compute_runoff(PDD,
     return runoff
 end
 
-function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, density_ice, air_temp, precip, P_lapse_rate)
+function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, density_ice, air_temp, precip, P_lapse_rate)
     PDD = compute_PDD_CalovGreve05(σ_T, air_temp.-273.15) # convert Kelvin to °C
     h_snow = compute_snow_depth(T_min, T_max, density_ice, air_temp, precip, P_lapse_rate)
     runoff = compute_runoff(PDD, Fs, Fi, θr, h_snow)
     SMB = h_snow - runoff # check if the formula is correct????
+    SMB[SMB.>SMB_max].=SMB_max 
     println("SMBmax: $(maximum(SMB)), SMBmin: $(minimum(SMB))")
     return SMB
 end
 
 function update_PDD_obj!(surface_melt::PDD_obj, clim::Clim_obj, params, fields)
     @unpack air_temp, precip, h_ref, γₚ = clim
-    @unpack T_min, T_max, σ_T, θr, Fi, Fs=surface_melt
+    @unpack T_min, T_max, σ_T, θr, Fi, Fs, SMB_max=surface_melt
     P_lapse_rate = zeros(size(h_ref))
-    P_lapse_rate .= exp.(-1 * γₚ .* max.(0, fields.gh.s .- h_ref))
+    P_lapse_rate .= exp.(-1 * γₚ .* max.(0, (fields.gh.s .- h_ref)))
     println("P_lapse_rate_max: $(maximum(P_lapse_rate))")
-    surface_melt.SMB .= compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, params.density_ice, air_temp, precip, P_lapse_rate)
+    surface_melt.SMB .= compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, params.density_ice, air_temp, precip, P_lapse_rate)
     println("Surface mass balance is updated")
     return nothing
 end
