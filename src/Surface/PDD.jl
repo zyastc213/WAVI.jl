@@ -95,8 +95,8 @@ function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, 
     PDD = compute_PDD_CalovGreve05(σ_T, air_temp.-273.15) # convert Kelvin to °C
     h_snow = compute_snow_depth(T_min, T_max, density_ice, air_temp, precip, P_lapse_rate)
     runoff = compute_runoff(PDD, Fs, Fi, θr, h_snow)
-    SMB = h_snow - runoff # check if the formula is correct????
-    SMB[SMB.>SMB_max].=SMB_max 
+    SMB = h_snow - runoff # check if the formula is correct???? 
+    SMB .= ifelse.(SMB.>0, SMB_max .* tanh.(SMB./SMB_max), SMB)
     println("SMBmax: $(maximum(SMB)), SMBmin: $(minimum(SMB))")
     return SMB
 end
@@ -106,7 +106,7 @@ function update_PDD_obj!(surface_melt::PDD_obj, clim::Clim_obj, params, fields)
     @unpack T_min, T_max, σ_T, θr, Fi, Fs, SMB_max=surface_melt
     P_lapse_rate = zeros(size(h_ref))
     P_lapse_rate .= exp.(-1 * γₚ .* max.(0, (fields.gh.s .- h_ref)))
-    println("P_lapse_rate_max: $(maximum(P_lapse_rate))")
+    println("P_lapse_rate_max: $(minimum(P_lapse_rate))")
     surface_melt.SMB .= compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, params.density_ice, air_temp, precip, P_lapse_rate)
     println("Surface mass balance is updated")
     return nothing
