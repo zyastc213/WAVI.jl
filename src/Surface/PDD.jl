@@ -24,7 +24,7 @@ function PDD_obj(;
             θr=0.6,
             Fi=0.00879120879120879,
             Fs=0.0032967032967033,
-            SMB_max=3.0,
+            SMB_max=999.0,
             PDD_scheme = true,
             SMB = nothing
             )
@@ -96,7 +96,9 @@ function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, 
     h_snow = compute_snow_depth(T_min, T_max, density_ice, air_temp, precip, P_lapse_rate)
     runoff = compute_runoff(PDD, Fs, Fi, θr, h_snow)
     SMB = h_snow - runoff # check if the formula is correct???? 
-    SMB .= ifelse.(SMB.>0, SMB_max .* tanh.(SMB./SMB_max), SMB)
+    if SMB_max != 999.0
+        SMB .= ifelse.(SMB.>0, SMB_max .* tanh.(SMB./SMB_max), SMB)
+    end
     println("SMBmax: $(maximum(SMB)), SMBmin: $(minimum(SMB))")
     return SMB
 end
