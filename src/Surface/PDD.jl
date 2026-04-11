@@ -84,7 +84,7 @@ function compute_runoff(PDD,
                         Fi,
                         θr,
                         h_snow)
-    snow_melt = max.(h_snow, PDD .* Fs)
+    snow_melt = min.(h_snow, PDD .* Fs)
     ice_melt = (PDD .- snow_melt / Fs) .* Fi
     refreeze = (snow_melt .+ ice_melt) .* θr
     runoff = snow_melt .+ ice_melt .- refreeze
