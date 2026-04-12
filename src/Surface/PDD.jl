@@ -13,6 +13,7 @@ struct PDD_obj{T <: Real, X} <: AbstractSurfaceProcess
     SMB_max :: T
     PDD_scheme :: Bool            # choose if you want to use PDD scheme
     SMB :: Array{T,2}             # surface mass balance
+    IceMelt :: Bool
 end 
 
 function PDD_obj(;
@@ -26,7 +27,8 @@ function PDD_obj(;
             Fs=0.0032967032967033,
             SMB_max=999.0,
             PDD_scheme = true,
-            SMB = nothing
+            SMB = nothing,
+            IceMelt = false
             )
  
     @assert T_max > T_min
@@ -35,7 +37,7 @@ function PDD_obj(;
     @assert Fi > 0 && Fs >0
     ~(SMB === nothing) || throw(ArgumentError("You must input a initial SMB such as zeros(nx,ny)"))
 
-    return PDD_obj(T_min, T_max, σ_T, σ_lapse_lat_base, σ_lapse_lat_rate, θr, Fi, Fs, SMB_max, PDD_scheme, SMB)
+    return PDD_obj(T_min, T_max, σ_T, σ_lapse_lat_base, σ_lapse_lat_rate, θr, Fi, Fs, SMB_max, PDD_scheme, SMB, IceMelt)
 end
 
 # calculate the number of PDDs (in:T out:PDD) 
@@ -83,18 +85,23 @@ function compute_runoff(PDD,
                         Fs,
                         Fi,
                         θr,
-                        h_snow)
+                        h_snow,
+                        IceMelt)
     snow_melt = min.(h_snow, PDD .* Fs)
     ice_melt = (PDD .- snow_melt / Fs) .* Fi
-    refreeze = (snow_melt .+ ice_melt) .* θr
+    if !IceMelt
+        refreeze = snow_melt .* θr
+    else
+        refreeze = (snow_melt .+ ice_melt) .* θr
+    end
     runoff = snow_melt .+ ice_melt .- refreeze
     return runoff
 end
 
-function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, density_ice, air_temp, precip, P_lapse_rate)
+function compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, IceMelt, density_ice, air_temp, precip, P_lapse_rate)
     PDD = compute_PDD_CalovGreve05(σ_T, air_temp.-273.15) # convert Kelvin to °C
     h_snow = compute_snow_depth(T_min, T_max, density_ice, air_temp, precip, P_lapse_rate)
-    runoff = compute_runoff(PDD, Fs, Fi, θr, h_snow)
+    runoff = compute_runoff(PDD, Fs, Fi, θr, h_snow, IceMelt)
     SMB = h_snow - runoff # check if the formula is correct???? 
     if SMB_max != 999.0
         SMB .= ifelse.(SMB.>0, SMB_max .* tanh.(SMB./SMB_max), SMB)
@@ -105,11 +112,11 @@ end
 
 function update_PDD_obj!(surface_melt::PDD_obj, clim::Clim_obj, params, fields)
     @unpack air_temp, precip, h_ref, γₚ = clim
-    @unpack T_min, T_max, σ_T, θr, Fi, Fs, SMB_max=surface_melt
+    @unpack T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, IceMelt=surface_melt
     P_lapse_rate = zeros(size(h_ref))
     P_lapse_rate .= exp.(-1 * γₚ .* max.(0, (fields.gh.s .- h_ref)))
     println("P_lapse_rate_max: $(minimum(P_lapse_rate))")
-    surface_melt.SMB .= compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, params.density_ice, air_temp, precip, P_lapse_rate)
+    surface_melt.SMB .= compute_surface_mass_balance(T_min, T_max, σ_T, θr, Fi, Fs, SMB_max, IceMelt, params.density_ice, air_temp, precip, P_lapse_rate)
     println("Surface mass balance is updated")
     return nothing
 end
