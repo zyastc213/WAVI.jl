@@ -45,9 +45,17 @@ function compute_PDD_CalovGreve05(σ_T,
                                   T)
     N = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     PDD = zeros(size(T[:,:,1]))
+    if isa(σ_T, Number)
+        println("std is scalar")
+        σ_T_arr = fill(σ_T, size(T))
+    elseif isa(σ_T, Array)
+        σ_T_arr = σ_T
+    else
+        throw(ArgumentError("std must be scalar or an Array"))
+    end
     for i=1:12
-        Z = T[:,:,i] ./ (sqrt(2) .* σ_T[:,:,i])
-        PDD .+= (σ_T[:,:,i] ./ sqrt(2*π) .* exp.(-Z.^2) + T[:,:,i] ./ 2 .* erfc.(-Z)) .* N[i]
+        Z = T[:,:,i] ./ (sqrt(2) .* σ_T_arr[:,:,i])
+        PDD .+= (σ_T_arr[:,:,i] ./ sqrt(2*π) .* exp.(-Z.^2) + T[:,:,i] ./ 2 .* erfc.(-Z)) .* N[i]
     end
     println("PDD_max: $(maximum(PDD))")
     return PDD
